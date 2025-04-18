@@ -20,15 +20,15 @@ buildscript {
         jcenter()
     }
     dependencies {
-        classpath "cz.alenkacz:gradle-scalafmt:${gradle.scalafmt.version}"
+        // classpath "cz.alenkacz:gradle-scalafmt:${gradle.scalafmt.version}"
     }
 }
 
 plugins {
+    id 'cz.alenkacz.gradle.scalafmt' version '1.14.0'
     id "com.gradle.build-scan" version "2.3"
     id "org.scoverage" version "4.0.1" apply false
 }
-
 
 buildScan {
     termsOfServiceUrl = 'https://gradle.com/terms-of-service'

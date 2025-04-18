@@ -54,6 +54,10 @@ if(project.hasProperty('dockerHost')) {
     dockerBinary += ['--host', project.dockerHost]
 }
 
+ext {
+    dockerBuildArgs = project.hasProperty('dockerBuildArgs') ? project.dockerBuildArgs : []
+}
+
 if(project.hasProperty('dockerBuildArgs')) {
     dockerBuildArgs.each { arg  ->
         dockerBuildArg += ['--build-arg', arg]
