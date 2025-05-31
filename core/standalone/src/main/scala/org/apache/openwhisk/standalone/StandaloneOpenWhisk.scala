@@ -226,7 +226,8 @@ object StandaloneOpenWhisk extends SLF4JLogging {
     implicit val logger: Logging = createLogging(actorSystem, conf)
     implicit val ec: ExecutionContext = actorSystem.dispatcher
 
-    setSysProp("whisk.spi.ContainerFactoryProvider", "org.apache.openwhisk.core.containerpool.wasm.WasmContainerFactoryProvider")
+    //setSysProp("whisk.spi.ContainerFactoryProvider", "org.apache.openwhisk.core.containerpool.wasm.WasmContainerFactoryProvider")
+    setSysProp("whisk.spi.ContainerFactoryProvider", "org.apache.openwhisk.core.containerpool.hybrid.HybridContainerFactoryProvider")
 
     val owPort = conf.port()
     val (dataDir, workDir) = initializeDirs(conf)
