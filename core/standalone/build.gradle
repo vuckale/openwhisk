@@ -23,6 +23,22 @@ plugins {
     id 'org.springframework.boot' version '2.1.6.RELEASE'
     id 'scala'
     id 'com.gorylenko.gradle-git-properties' version '2.4.2'
+    id "com.github.johnrengelman.shadow" version "5.1.0"
+}
+
+shadowJar {
+  archiveClassifier.set('all')
+  zip64 true
+
+  manifest {
+    attributes 'Main-Class': 'org.apache.openwhisk.standalone.StandaloneOpenWhisk'
+  }
+
+  // ensure all HOCON config files are aggregated
+  append 'reference.conf'
+  append 'application.conf'
+
+  mergeServiceFiles()
 }
 
 ext.dockerImageName = 'standalone'
