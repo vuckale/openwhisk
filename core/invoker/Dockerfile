@@ -17,6 +17,8 @@
 
 FROM scala
 
+ENV INVOKER_OPTS="$INVOKER_OPTS -Dwhisk.spi.ContainerFactoryProvider=org.apache.openwhisk.core.containerpool.hybrid.HybridContainerFactoryProvider"
+
 ENV UID=1001 \
     NOT_ROOT_USER=owuser
     ENV DOCKER_VERSION=18.06.3-ce
