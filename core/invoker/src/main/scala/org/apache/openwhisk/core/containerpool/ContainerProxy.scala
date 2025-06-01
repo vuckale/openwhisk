@@ -54,6 +54,7 @@ import org.apache.openwhisk.core.connector.{
   ResultMessage
 }
 import org.apache.openwhisk.core.containerpool.logging.LogCollectingException
+import org.apache.openwhisk.core.containerpool.wasm.WasmContainer
 import org.apache.openwhisk.core.database.UserContext
 import org.apache.openwhisk.core.entity.ExecManifest.ImageName
 import org.apache.openwhisk.core.entity._
@@ -528,9 +529,18 @@ class ContainerProxy(factory: (TransactionId,
   }
 
   when(Pausing) {
-    case Event(ContainerPaused, data: WarmedData)   => goto(Paused)
-    case Event(_: FailureMessage, data: WarmedData) => destroyContainer(data, true)
-    case _                                          => delay
+    case Event(ContainerPaused, data: WarmedData) =>
+      val pauseFor = data.container match {
+        case _: WasmContainer => 10.seconds
+        case _                => 60.seconds
+      }
+      logging.info(this, s"Paused ${data.container.getClass.getSimpleName} for $pauseFor")
+      goto(Paused) using data forMax pauseFor
+
+    case Event(_: FailureMessage, data: WarmedData) =>
+      destroyContainer(data, true)
+
+    case _ => delay
   }
 
   when(Paused, stateTimeout = unusedTimeout) {
@@ -558,6 +568,17 @@ class ContainerProxy(factory: (TransactionId,
       rescheduleJob = true // to supress sending message to the pool and not double count
       destroyContainer(data, true)
   }
+
+  onTransition {
+    case _ -> Paused =>
+      nextStateData match {
+        case data: WarmedData =>
+          logging.info(this, s"Entered Paused for ${data.container.getClass.getSimpleName}")
+        case _ =>
+          logging.info(this, "Entered Paused")
+      }
+  }
+
 
   when(Removing) {
     case Event(job: Run, _) =>
